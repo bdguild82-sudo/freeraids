@@ -1,288 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Access Gateway</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0a0b10;
-      --panel:#0f1220;
-      --panel2:#12162a;
-      --border:rgba(255,255,255,.08);
-      --accent:#6d7cff;
-      --accent2:#9aa4ff;
-      --text:#eef0ff;
-      --muted:#9aa0ff;
-      --ok:#22c55e;
-      --danger:#ff6b6b;
-    }
-    *{box-sizing:border-box}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raid Gateway</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-    body{
-      margin:0; font-family:Inter,system-ui; color:var(--text);
-      background:
-        radial-gradient(800px 420px at 50% -20%, #1b215e, transparent),
-        radial-gradient(700px 380px at 90% 20%, #121a4a, transparent),
-        var(--bg);
-      min-height:100vh;
-      cursor:none;
-    }
+<style>
+:root{
+  --bg:#0a0b10;
+  --panel:#0f1220;
+  --border:rgba(255,255,255,.08);
+  --accent:#6d7cff;
+  --accent2:#9aa4ff;
+  --text:#eef0ff;
+  --muted:#9aa0ff;
+  --ok:#22c55e;
+}
 
-    /* Custom cursor */
-    .cursor{
-      position:fixed; top:0; left:0; width:18px; height:18px; border-radius:50%;
-      background:rgba(154,164,255,.9); pointer-events:none; z-index:9999;
-      transform:translate(-50%,-50%);
-      transition:transform .08s ease, width .15s ease, height .15s ease, background .15s ease;
-      box-shadow:0 0 20px rgba(154,164,255,.6)
-    }
-    .cursor.hover{width:32px; height:32px; background:rgba(154,164,255,.25)}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:
+    radial-gradient(800px 420px at 50% -20%, #1b215e, transparent),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    /* Top bar */
-    .top{
-      position:sticky; top:0; z-index:5;
-      backdrop-filter: blur(10px);
-      background:linear-gradient(180deg, rgba(10,11,16,.75), rgba(10,11,16,.35));
-      border-bottom:1px solid var(--border);
-    }
-    .top .inner{
-      max-width:1100px; margin:0 auto; padding:14px 20px;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:16px;
-    }
-    .brand{font-weight:800; letter-spacing:.4px}
-    .pill{font-size:12px; color:#0b0d1a; background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:6px 10px; border-radius:999px}
+.card{
+  width:100%;
+  max-width:520px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 40px 90px rgba(0,0,0,.55);
+  animation:rise .4s ease forwards;
+}
 
-    /* Raid counter */
-    .raids{
-      display:flex; align-items:center; gap:14px;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), transparent), var(--panel2);
-      border:1px solid var(--border); border-radius:16px; padding:10px 14px;
-      box-shadow:0 20px 40px rgba(0,0,0,.4)
-    }
-    .raids h4{margin:0; font-size:14px}
-    .raid-count{
-      font-size:26px; font-weight:800; position:relative; overflow:hidden
-    }
-    .slash{
-      position:absolute; inset:0; background:linear-gradient(120deg, transparent 40%, rgba(255,255,255,.8), transparent 60%);
-      transform:translateX(-120%);
-    }
-    .slash.play{animation:slash .6s ease forwards}
-    @keyframes slash{to{transform:translateX(120%)}}
+@keyframes rise{
+  from{opacity:0; transform:translateY(12px)}
+  to{opacity:1; transform:none}
+}
 
-    /* Layout */
-    .wrap{max-width:1100px; margin:0 auto; padding:36px 20px 60px}
-    .grid{display:grid; grid-template-columns:1.2fr .8fr; gap:22px}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+.topbox{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
 
-    /* Cards */
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), transparent 45%), var(--panel);
-      border:1px solid var(--border);
-      border-radius:20px; padding:22px;
-      box-shadow:0 30px 70px rgba(0,0,0,.45);
-      animation:rise .45s ease forwards; opacity:0; transform:translateY(10px)
-    }
-    .card.soft{background:linear-gradient(180deg, rgba(255,255,255,.05), transparent 40%), var(--panel2)}
-    @keyframes rise{to{opacity:1; transform:none}}
+.raid{
+  font-weight:800;
+  font-size:14px;
+}
 
-    h1{margin:0 0 6px; font-size:34px}
-    p{margin:0; color:var(--muted)}
+.claim{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  color:#0b0d1a;
+}
 
-    /* Steps */
-    .steps{display:grid; gap:12px; margin-top:16px}
-    .step{
-      position:relative; overflow:hidden;
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      padding:16px; border-radius:16px;
-      border:1px solid var(--border); background:#0d1022;
-      transition:transform .15s ease, box-shadow .15s ease
-    }
-    .step:hover{transform:translateY(-2px); box-shadow:0 20px 40px rgba(0,0,0,.45)}
+.claim:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
 
-    .left{display:flex; align-items:center; gap:12px}
-    .num{
-      width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
-      background:rgba(109,124,255,.18); color:var(--accent); font-weight:800
-    }
-    .num.ok{background:rgba(34,197,94,.22); color:var(--ok)}
-    .meta{font-size:13px; color:var(--muted)}
-    .status{font-size:12px}
-    .wait{color:#a5b4ff}
-    .done{color:var(--ok)}
+h1{
+  margin:0 0 6px;
+  font-size:26px;
+}
 
-    .shine{position:absolute; inset:0; background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.18), transparent 70%); transform:translateX(-120%); animation:shine 1.05s ease forwards}
-    @keyframes shine{to{transform:translateX(120%)}}
+p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
 
-    /* Buttons */
-    .btn{
-      appearance:none; border:0; border-radius:14px; padding:12px 16px; cursor:pointer;
-      font-weight:800; color:#0b0d1a;
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      box-shadow:0 14px 30px rgba(109,124,255,.35);
-      transition:transform .15s ease, box-shadow .15s ease
-    }
-    .btn:hover{transform:translateY(-1px); box-shadow:0 22px 45px rgba(109,124,255,.45)}
-    .btn:disabled{opacity:.55; cursor:not-allowed; box-shadow:none}
-    .ghost{background:#0b0f22; color:var(--text); border:1px solid var(--border)}
+.steps{
+  display:grid;
+  gap:14px;
+  margin-top:18px;
+}
 
-    /* Progress */
-    .progress{height:10px; background:#0b0f22; border-radius:999px; overflow:hidden; border:1px solid var(--border)}
-    .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .4s ease}
+.step{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:#0c0f22;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
 
-    .sp{height:10px}
-    footer{opacity:.6; text-align:center; margin-top:28px; font-size:12px}
-  </style>
+.step:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 30px rgba(0,0,0,.4);
+}
+
+.left{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.num{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:rgba(109,124,255,.18);
+  color:var(--accent);
+  font-weight:800;
+}
+
+.num.ok{
+  background:rgba(34,197,94,.25);
+  color:var(--ok);
+}
+
+.status{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.done{
+  color:var(--ok);
+}
+
+.btn{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border:none;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  cursor:pointer;
+  color:#0b0d1a;
+}
+
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.progress{
+  margin-top:18px;
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#0b0f22;
+}
+
+.bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .4s ease;
+}
+
+.shine{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.2), transparent 70%);
+  animation:shine 1s ease forwards;
+}
+
+@keyframes shine{
+  from{transform:translateX(-120%)}
+  to{transform:translateX(120%)}
+}
+</style>
 </head>
+
 <body>
-  <div class="cursor" id="cursor"></div>
 
-  <div class="top">
-    <div class="inner">
-      <div class="brand">Access Gateway</div>
-      <div class="raids">
-        <div>
-          <h4>Claim Raids</h4>
-          <div style="font-size:12px;color:var(--muted)">No raid points</div>
-        </div>
-        <div class="raid-count" id="raidCount">0<div class="slash" id="slash"></div></div>
+<div class="card">
+  <div class="topbox">
+    <div class="raid">⚔️ Raid Points: <span id="raidCount">0</span></div>
+    <button id="claim" class="claim" onclick="claimRaid()" disabled>Claim Raids</button>
+  </div>
+
+  <h1>Complete Tasks</h1>
+  <p>Finish both tasks below to receive 1 free raid.</p>
+
+  <div class="steps">
+    <div class="step" id="step1">
+      <div class="left">
+        <div class="num" id="n1">1</div>
+        <div>#1 Task</div>
       </div>
-      <div class="pill">Protected</div>
+      <div class="status" id="s1">Locked</div>
+      <button class="btn" id="b1" onclick="startTask(1)">Start</button>
+    </div>
+
+    <div class="step" id="step2">
+      <div class="left">
+        <div class="num" id="n2">2</div>
+        <div>#2 Task</div>
+      </div>
+      <div class="status" id="s2">Locked</div>
+      <button class="btn" id="b2" onclick="startTask(2)" disabled>Start</button>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="grid">
-      <div class="card">
-        <h1>Complete verification</h1>
-        <p>Do the 2 tasks below to get <b>1 free raid</b>.</p>
-
-        <div class="steps">
-          <div class="step" id="step1">
-            <div class="left">
-              <div id="n1" class="num">1</div>
-              <div>
-                <div>#1 Task</div>
-                <div class="meta">Short task • takes a few seconds</div>
-              </div>
-            </div>
-            <div class="status wait" id="st1">Locked</div>
-            <button id="b1" class="btn" onclick="go(1)">Start</button>
-          </div>
-
-          <div class="step" id="step2">
-            <div class="left">
-              <div id="n2" class="num">2</div>
-              <div>
-                <div>#2 Task</div>
-                <div class="meta">Required to continue</div>
-              </div>
-            </div>
-            <div class="status wait" id="st2">Locked</div>
-            <button id="b2" class="btn" onclick="go(2)" disabled>Start</button>
-          </div>
-        </div>
-
-        <div class="sp"></div>
-        <div class="progress"><div id="bar" class="bar"></div></div>
-        <div class="sp"></div>
-        <button id="continue" class="btn" disabled onclick="finish()">Claim Raid</button>
-      </div>
-
-      <div class="card soft">
-        <h3>Info</h3>
-        <p>You currently have no raid points. Complete both tasks to earn <b>1 free raid</b>.</p>
-        <div class="sp"></div>
-        <button class="btn ghost" onclick="resetAll()">Reset session</button>
-      </div>
-    </div>
-
-    <footer>Gateway system</footer>
+  <div class="progress">
+    <div class="bar" id="bar"></div>
   </div>
+</div>
 
-  <script>
-    const WAIT_MS = 4500;
-    const links = {
-      1: 'https://link-center.net/3162390/k3Kizh3M61IZ',
-      2: 'https://direct-link.net/3162390/HnNPYfgENml5'
-    };
-    const done = {1:false,2:false};
-    let raids = 0;
+<script>
+const WAIT_MS = 20000;
+const links = {
+  1: 'https://link-center.net/3162390/k3Kizh3M61IZ',
+  2: 'https://direct-link.net/3162390/HnNPYfgENml5'
+};
 
-    function go(i){
-      localStorage.setItem('lv_start_'+i, Date.now());
-      localStorage.setItem('lv_wait_'+i, '1');
-      setWaiting(i);
-      window.open(links[i], '_blank');
+let done = JSON.parse(localStorage.getItem('done')) || {1:false,2:false};
+let raids = Number(localStorage.getItem('raids')) || 0;
+
+document.getElementById('raidCount').innerText = raids;
+
+function startTask(i){
+  localStorage.setItem('start_'+i, Date.now());
+  localStorage.setItem('waiting_'+i, '1');
+  document.getElementById('s'+i).innerText = 'Complete Linkvertise';
+  window.open(links[i],'_blank');
+}
+
+function completeTask(i){
+  if(done[i]) return;
+  done[i]=true;
+  localStorage.setItem('done',JSON.stringify(done));
+  document.getElementById('n'+i).classList.add('ok');
+  document.getElementById('s'+i).innerText='Completed';
+  document.getElementById('s'+i).classList.add('done');
+  document.getElementById('b'+i).disabled=true;
+  updateProgress();
+  if(i===1) document.getElementById('b2').disabled=false;
+}
+
+function updateProgress(){
+  let count=Object.values(done).filter(Boolean).length;
+  document.getElementById('bar').style.width=(count*50)+'%';
+  document.getElementById('claim').disabled=count!==2;
+}
+
+function checkReturn(){
+  [1,2].forEach(i=>{
+    let start=localStorage.getItem('start_'+i);
+    let wait=localStorage.getItem('waiting_'+i);
+    if(start && wait && !done[i]){
+      let elapsed=Date.now()-start;
+      if(elapsed>=WAIT_MS){
+        localStorage.removeItem('waiting_'+i);
+        completeTask(i);
+      }else{
+        setTimeout(()=>completeTask(i),WAIT_MS-elapsed);
+      }
     }
+  });
+}
 
-    function setWaiting(i){
-      document.getElementById('st'+i).innerText = 'Complete Linkvertise';
-      document.getElementById('st'+i).className = 'status wait';
-    }
+function claimRaid(){
+  raids++;
+  localStorage.setItem('raids',raids);
+  document.getElementById('raidCount').innerText=raids;
+  alert('You received 1 Raid Point!');
+}
 
-    function complete(i){
-      if(done[i]) return;
-      done[i] = true;
-      document.getElementById('n'+i).classList.add('ok');
-      document.getElementById('st'+i).innerText = 'Completed';
-      document.getElementById('st'+i).className = 'status done';
-      document.getElementById('b'+i).disabled = true;
-      const step = document.getElementById('step'+i);
-      const fx = document.createElement('div'); fx.className='shine'; step.appendChild(fx);
-      if(i===1){ document.getElementById('b2').disabled = false; document.getElementById('st2').innerText='Ready'; }
-      update();
-    }
+updateProgress();
+checkReturn();
+</script>
 
-    function update(){
-      const count = Object.values(done).filter(Boolean).length;
-      document.getElementById('bar').style.width = (count/2*100)+'%';
-      document.getElementById('continue').disabled = count !== 2;
-    }
-
-    function checkReturn(){
-      [1,2].forEach(i=>{
-        const wait = localStorage.getItem('lv_wait_'+i);
-        const start = Number(localStorage.getItem('lv_start_'+i));
-        if(wait && start && !done[i]){
-          const elapsed = Date.now() - start;
-          if(elapsed >= WAIT_MS){
-            localStorage.removeItem('lv_wait_'+i);
-            complete(i);
-          } else {
-            setWaiting(i);
-            setTimeout(()=>{ if(!done[i]) complete(i); }, WAIT_MS - elapsed);
-          }
-        }
-      });
-    }
-
-    function finish(){
-      raids = 1;
-      const el = document.getElementById('raidCount');
-      el.firstChild.nodeValue = raids;
-      const s = document.getElementById('slash');
-      s.classList.remove('play'); void s.offsetWidth; s.classList.add('play');
-      alert('You claimed 1 free raid!');
-    }
-
-    function resetAll(){ localStorage.clear(); location.reload(); }
-
-    // cursor
-    const cursor = document.getElementById('cursor');
-    window.addEventListener('mousemove', e=>{
-      cursor.style.left = e.clientX+'px';
-      cursor.style.top = e.clientY+'px';
-    });
-    document.querySelectorAll('button, .step').forEach(el=>{
-      el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
-      el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
-    });
-
-    checkReturn();
-  </script>
 </body>
 </html>
