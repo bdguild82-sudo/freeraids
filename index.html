@@ -16,8 +16,10 @@
       --text:#eef0ff;
       --muted:#9aa0ff;
       --ok:#22c55e;
+      --danger:#ff6b6b;
     }
     *{box-sizing:border-box}
+
     body{
       margin:0; font-family:Inter,system-ui; color:var(--text);
       background:
@@ -25,7 +27,18 @@
         radial-gradient(700px 380px at 90% 20%, #121a4a, transparent),
         var(--bg);
       min-height:100vh;
+      cursor:none;
     }
+
+    /* Custom cursor */
+    .cursor{
+      position:fixed; top:0; left:0; width:18px; height:18px; border-radius:50%;
+      background:rgba(154,164,255,.9); pointer-events:none; z-index:9999;
+      transform:translate(-50%,-50%);
+      transition:transform .08s ease, width .15s ease, height .15s ease, background .15s ease;
+      box-shadow:0 0 20px rgba(154,164,255,.6)
+    }
+    .cursor.hover{width:32px; height:32px; background:rgba(154,164,255,.25)}
 
     /* Top bar */
     .top{
@@ -37,9 +50,28 @@
     .top .inner{
       max-width:1100px; margin:0 auto; padding:14px 20px;
       display:flex; align-items:center; justify-content:space-between;
+      gap:16px;
     }
     .brand{font-weight:800; letter-spacing:.4px}
     .pill{font-size:12px; color:#0b0d1a; background:linear-gradient(90deg,var(--accent),var(--accent2)); padding:6px 10px; border-radius:999px}
+
+    /* Raid counter */
+    .raids{
+      display:flex; align-items:center; gap:14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), transparent), var(--panel2);
+      border:1px solid var(--border); border-radius:16px; padding:10px 14px;
+      box-shadow:0 20px 40px rgba(0,0,0,.4)
+    }
+    .raids h4{margin:0; font-size:14px}
+    .raid-count{
+      font-size:26px; font-weight:800; position:relative; overflow:hidden
+    }
+    .slash{
+      position:absolute; inset:0; background:linear-gradient(120deg, transparent 40%, rgba(255,255,255,.8), transparent 60%);
+      transform:translateX(-120%);
+    }
+    .slash.play{animation:slash .6s ease forwards}
+    @keyframes slash{to{transform:translateX(120%)}}
 
     /* Layout */
     .wrap{max-width:1100px; margin:0 auto; padding:36px 20px 60px}
@@ -66,8 +98,11 @@
       position:relative; overflow:hidden;
       display:flex; align-items:center; justify-content:space-between; gap:14px;
       padding:16px; border-radius:16px;
-      border:1px solid var(--border); background:#0d1022
+      border:1px solid var(--border); background:#0d1022;
+      transition:transform .15s ease, box-shadow .15s ease
     }
+    .step:hover{transform:translateY(-2px); box-shadow:0 20px 40px rgba(0,0,0,.45)}
+
     .left{display:flex; align-items:center; gap:12px}
     .num{
       width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
@@ -103,9 +138,18 @@
   </style>
 </head>
 <body>
+  <div class="cursor" id="cursor"></div>
+
   <div class="top">
     <div class="inner">
       <div class="brand">Access Gateway</div>
+      <div class="raids">
+        <div>
+          <h4>Claim Raids</h4>
+          <div style="font-size:12px;color:var(--muted)">No raid points</div>
+        </div>
+        <div class="raid-count" id="raidCount">0<div class="slash" id="slash"></div></div>
+      </div>
       <div class="pill">Protected</div>
     </div>
   </div>
@@ -114,14 +158,14 @@
     <div class="grid">
       <div class="card">
         <h1>Complete verification</h1>
-        <p>Finish the steps below to unlock access.</p>
+        <p>Do the 2 tasks below to get <b>1 free raid</b>.</p>
 
         <div class="steps">
           <div class="step" id="step1">
             <div class="left">
               <div id="n1" class="num">1</div>
               <div>
-                <div>Verification step</div>
+                <div>#1 Task</div>
                 <div class="meta">Short task • takes a few seconds</div>
               </div>
             </div>
@@ -133,7 +177,7 @@
             <div class="left">
               <div id="n2" class="num">2</div>
               <div>
-                <div>Secondary check</div>
+                <div>#2 Task</div>
                 <div class="meta">Required to continue</div>
               </div>
             </div>
@@ -145,12 +189,12 @@
         <div class="sp"></div>
         <div class="progress"><div id="bar" class="bar"></div></div>
         <div class="sp"></div>
-        <button id="continue" class="btn" disabled onclick="finish()">Continue</button>
+        <button id="continue" class="btn" disabled onclick="finish()">Claim Raid</button>
       </div>
 
       <div class="card soft">
-        <h3>Why verification?</h3>
-        <p>This helps protect access and prevents abuse. Once completed, you’ll be redirected instantly.</p>
+        <h3>Info</h3>
+        <p>You currently have no raid points. Complete both tasks to earn <b>1 free raid</b>.</p>
         <div class="sp"></div>
         <button class="btn ghost" onclick="resetAll()">Reset session</button>
       </div>
@@ -160,12 +204,13 @@
   </div>
 
   <script>
-    const WAIT_MS = 4500; // 4–5s return window
+    const WAIT_MS = 4500;
     const links = {
       1: 'https://link-center.net/3162390/k3Kizh3M61IZ',
       2: 'https://direct-link.net/3162390/HnNPYfgENml5'
     };
     const done = {1:false,2:false};
+    let raids = 0;
 
     function go(i){
       localStorage.setItem('lv_start_'+i, Date.now());
@@ -216,13 +261,26 @@
     }
 
     function finish(){
-      alert('Access granted');
-      // window.location.href = 'https://YOUR_DESTINATION_URL';
+      raids = 1;
+      const el = document.getElementById('raidCount');
+      el.firstChild.nodeValue = raids;
+      const s = document.getElementById('slash');
+      s.classList.remove('play'); void s.offsetWidth; s.classList.add('play');
+      alert('You claimed 1 free raid!');
     }
 
-    function resetAll(){
-      localStorage.clear(); location.reload();
-    }
+    function resetAll(){ localStorage.clear(); location.reload(); }
+
+    // cursor
+    const cursor = document.getElementById('cursor');
+    window.addEventListener('mousemove', e=>{
+      cursor.style.left = e.clientX+'px';
+      cursor.style.top = e.clientY+'px';
+    });
+    document.querySelectorAll('button, .step').forEach(el=>{
+      el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
+      el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
+    });
 
     checkReturn();
   </script>
